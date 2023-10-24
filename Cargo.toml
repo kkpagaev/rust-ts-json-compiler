@@ -1,0 +1,11 @@
+[package]
+name = "rust-ts-json-compiler"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "ts-zod compiller to json"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+peg = "0.8.2"
