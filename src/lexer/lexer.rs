@@ -1,5 +1,5 @@
-use std::str::Chars;
 use std::iter::Peekable;
+use std::str::Chars;
 
 use super::Token;
 
@@ -21,28 +21,26 @@ impl<'a> Lexer<'a> {
     }
 
     fn next_char(&mut self) {
-        self.ch = match self.input.peek(){
+        self.ch = match self.input.peek() {
             Some(ch) => *ch as u8,
-            None => 0
+            None => 0,
         };
 
         self.input.next();
     }
 
-    fn peek(&mut self) -> u8 {
-        match self.input.peek(){
+    pub fn peek(&mut self) -> u8 {
+        match self.input.peek() {
             Some(ch) => *ch as u8,
-            None => 0
+            None => 0,
         }
     }
 
     pub fn next(&mut self) -> Token {
         self.skip_whitespace();
 
-        match self.ch {
-            b'a'..=b'z' | b'A'..=b'Z' | b'_' => {
-                self.consume_ident()
-            }
+        let ch = match self.ch {
+            b'a'..=b'z' | b'A'..=b'Z' | b'_' => self.consume_ident(),
             b'.' => {
                 self.next_char();
                 Token::Dot
@@ -51,9 +49,7 @@ impl<'a> Lexer<'a> {
                 self.next_char();
                 Token::Colon
             }
-            b'0'..=b'9' => {
-                self.consume_int()
-            }
+            b'0'..=b'9' => self.consume_int(),
             b',' => {
                 self.next_char();
                 Token::Comma
@@ -72,7 +68,7 @@ impl<'a> Lexer<'a> {
             }
             b'}' => {
                 self.next_char();
-                Token::LCurly
+                Token::RCurly
             }
             b'[' => {
                 self.next_char();
@@ -82,15 +78,16 @@ impl<'a> Lexer<'a> {
                 self.next_char();
                 Token::RSquare
             }
-            b'"' | b'\'' => {
-                self.consume_string()
-            }
+            b'"' | b'\'' => self.consume_string(),
             0 => Token::Eof,
             _ => {
                 self.next_char();
                 Token::Illegal
             }
-        }
+        };
+
+        println!("Token: {:?}", ch);
+        ch
     }
 
     fn consume_string(&mut self) -> Token {
@@ -111,7 +108,6 @@ impl<'a> Lexer<'a> {
         Token::Ident(value)
     }
 
-
     fn consume_ident(&mut self) -> Token {
         let mut value = String::new();
 
@@ -122,7 +118,6 @@ impl<'a> Lexer<'a> {
 
         Token::Ident(value)
     }
-
 
     fn skip_whitespace(&mut self) {
         loop {

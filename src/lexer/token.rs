@@ -74,9 +74,7 @@ impl From<String> for Token {
                 } else {
                     Self::Ident(value)
                 }
-
             }
         }
     }
 }
-

@@ -1,14 +1,15 @@
-use rust_ts_json_compiler::lexer::{Lexer, Token};
+use rust_ts_json_compiler::{lexer::{Lexer, Token}, syntax_tree::SyntaxTree};
 
-pub fn main() {
+pub fn main() -> anyhow::Result<()> {
+    // let schema = "z.coerce.number()";
     let schema = "z.object({
-  id: z.coerce.number()
+  id: z.coerce.number().int()
 })";
-    let mut lexel = Lexer::new(schema);
+    let mut lx = Lexer::new(schema);
     let mut tokens = Vec::new();
 
     loop {
-        let token = lexel.next();
+        let token = lx.next();
         if token == Token::Eof {
             break;
         }
@@ -16,5 +17,12 @@ pub fn main() {
         tokens.push(token);
     }
 
-    println!("{:?}", tokens);
+    // println!("{:?}", tokens);
+
+    let mut tree = SyntaxTree::new(tokens.into_iter().peekable());
+
+    println!("foo {:?}", tree.parse().unwrap());
+
+
+    return Ok(());
 }
