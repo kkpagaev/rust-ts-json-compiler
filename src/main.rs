@@ -6,6 +6,13 @@ pub fn main() -> anyhow::Result<()> {
   id: z.coerce.number().int(),
   email: z.coerce.string().email(),
   uuid: z.coerce.string().uuid(),
+  ids: z.array(z.coerce.number().int()),
+    nested: z.object({
+  id: z.coerce.number().int(),
+  email: z.coerce.string().email(),
+  uuid: z.coerce.string().uuid(),
+  ids: z.array(z.coerce.number().int())
+})
 })";
     let mut lx = Lexer::new(schema);
     let mut tokens = Vec::new();

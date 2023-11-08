@@ -8,7 +8,7 @@ use anyhow::{anyhow, Ok, Result};
 #[allow(dead_code)]
 pub enum ZodExpression {
     Object(Box<Vec<(String, ZodExpression)>>),
-    Array(Box<Vec<ZodExpression>>),
+    Array(Box<ZodExpression>),
     Literal(String),
     Number,
     UUID,
@@ -59,7 +59,7 @@ impl SyntaxTree {
 
         match ident.as_str() {
             "object" => self.parse_zod_object_body(),
-            "array" => Ok(ZodExpression::Array(Box::new(vec![]))),
+            "array" => self.parse_zod_array(),
             "literal" => Ok(ZodExpression::Literal("".to_string())),
             "number" => self.parse_zod_number(),
             "string" => self.parse_zod_string(),
@@ -70,6 +70,16 @@ impl SyntaxTree {
         }
     }
 
+    fn parse_zod_array(&mut self) -> Result<ZodExpression> {
+        self.next();
+        self.parse_left_round()?;
+        let exp = match self.parse() {
+            Some(e) => e,
+            None => return Err(anyhow!("Unexpected token in parse_zod_array")),
+        };
+
+        Ok(ZodExpression::Array(Box::new(exp)))
+    }
     fn parse_zod_number(&mut self) -> Result<ZodExpression> {
         self.next();
         self.parse_left_round()?;
