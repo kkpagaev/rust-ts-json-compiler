@@ -4,6 +4,7 @@ pub fn main() -> anyhow::Result<()> {
     // let schema = "z.coerce.number()";
     let schema = "z.object({
   id: z.coerce.number().int(),
+  isActive: z.coerce.boolean(),
   email: z.coerce.string().email(),
   uuid: z.coerce.string().uuid(),
   ids: z.array(z.coerce.number().int()),

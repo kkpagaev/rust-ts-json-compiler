@@ -63,11 +63,20 @@ impl SyntaxTree {
             "literal" => Ok(ZodExpression::Literal("".to_string())),
             "number" => self.parse_zod_number(),
             "string" => self.parse_zod_string(),
+            "boolean" => self.parse_zod_boolean(),
             "coerce" => {
                 self.parse_zod()
             },
             _ => Err(anyhow!("Unexpected token")),
         }
+    }
+
+    fn parse_zod_boolean(&mut self) -> Result<ZodExpression> {
+        self.next();
+        self.parse_left_round()?;
+        self.parse_right_round()?;
+
+        Ok(ZodExpression::Boolean)
     }
 
     fn parse_zod_array(&mut self) -> Result<ZodExpression> {
