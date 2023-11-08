@@ -161,6 +161,7 @@ impl SyntaxTree {
             Some(e) => e,
             None => return Err(anyhow!("Unexpected token in parse_zod_array")),
         };
+        self.parse_to_end_of_scope()?;
 
         Ok(ZodExpression::Array(Box::new(exp)))
     }

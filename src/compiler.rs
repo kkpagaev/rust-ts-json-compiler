@@ -1,4 +1,20 @@
-use crate::syntax_tree::ZodExpression;
+use crate::{syntax_tree::{ZodExpression, SyntaxTree}, lexer::{Token, Lexer}};
+
+pub fn get_syntax_tree(schema: &str) -> Option<ZodExpression> {
+    let mut lx = Lexer::new(schema);
+    let mut tokens = Vec::new();
+
+    loop {
+        let token = lx.next();
+        if token == Token::Eof {
+            break;
+        }
+
+        tokens.push(token);
+    }
+
+    SyntaxTree::new(tokens.into_iter().peekable()).parse()
+}
 
 pub fn to_json(zod: &ZodExpression) -> String {
     match zod {
