@@ -163,9 +163,13 @@ impl SyntaxTree {
         let mut obj = vec![];
 
         loop {
-            match self.next() {
+            let token = self.next();
+            match token  {
                 Some(Token::RCurly) => {
                     break;
+                }
+                Some(Token::RRound) => {
+                    continue;
                 }
                 Some(Token::Comma) => {
                     continue;
@@ -180,7 +184,7 @@ impl SyntaxTree {
                     println!("exp {:?}", exp);
                     obj.push((ident.to_owned(), exp));
                 }
-                _ => return Err(anyhow!("Unexpected token in parse_zod_object_body")),
+                _ => return Err(anyhow!("Unexpected token in parse_zod_object_body {}", token.unwrap())),
             }
 
             println!("{}", obj.len());
