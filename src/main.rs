@@ -14,6 +14,9 @@ pub fn main() -> anyhow::Result<()> {
   email: z.coerce.string().email(),
   uuid: z.coerce.string().uuid(),
   ids: z.array(z.coerce.number().int()),
+  orderBy: z
+    .enum([\"id\", \"status\", \"createdAt\", \"updatedAt\", \"totalPrice\"])
+    .optional(),
 products: z.array(
           z.object({
             productId: z.number().int(),

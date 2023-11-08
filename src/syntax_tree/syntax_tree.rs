@@ -63,6 +63,7 @@ impl SyntaxTree {
             "array" => self.parse_zod_array(),
             "literal" => self.parse_zod_literal(),
             "number" => self.parse_zod_number(),
+            "enum" => self.parse_zod_enum(),
             "string" => self.parse_zod_string(),
             "boolean" => self.parse_zod_boolean(),
             "any" => self.parse_zod_any(),
@@ -84,6 +85,38 @@ impl SyntaxTree {
             _ => Err(anyhow!("Unexpected token in parse_zod_literal")),
         }
     }
+
+    fn parse_zod_enum(&mut self) -> Result<ZodExpression> {
+        self.next();
+        self.parse_left_round()?;
+        self.parse_left_square()?;
+
+        let mut arr = vec![];
+
+        loop {
+            let token = self.next();
+            match token  {
+                Some(Token::RSquare) => {
+                    break;
+                }
+                Some(Token::Comma) => {
+                    continue;
+                }
+                Some(Token::Str(ref str)) => {
+                    println!("ident {:?}", str);
+                    arr.push(str.to_owned());
+                }
+                _ => return Err(anyhow!("Unexpected token in parse_zod_enum {}", token.unwrap())),
+            }
+
+            println!("{}", arr.len());
+        }
+        self.parse_right_round()?;
+        self.parse_to_end_of_scope()?;
+
+        Ok(ZodExpression::Enum(arr))
+    }
+
     fn parse_zod_any(&mut self) -> Result<ZodExpression> {
         self.next();
         self.parse_left_round()?;
@@ -237,6 +270,13 @@ impl SyntaxTree {
         match self.next() {
             Some(Token::Colon) => Ok(()),
             _ => Err(anyhow!("Unexpected token parse_colon")),
+        }
+    }
+
+    fn parse_left_square(&mut self) -> Result<()> {
+        match self.next() {
+            Some(Token::LSquare) => Ok(()),
+            _ => Err(anyhow!("Unexpected token parse_left_square")),
         }
     }
 
