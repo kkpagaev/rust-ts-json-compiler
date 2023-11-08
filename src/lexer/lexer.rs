@@ -86,7 +86,6 @@ impl<'a> Lexer<'a> {
             }
         };
 
-        println!("Token: {:?}", ch);
         ch
     }
 

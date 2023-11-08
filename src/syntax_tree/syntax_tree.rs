@@ -37,8 +37,7 @@ impl SyntaxTree {
                         Result::Ok(zod) => {
                             Some(zod)
                         },
-                        Err(e) => {
-                            println!("{:?}", e);
+                        Err(_) => {
                             None
                         }
                     }
@@ -129,13 +128,10 @@ impl SyntaxTree {
                     continue;
                 }
                 Some(Token::Str(ref str)) => {
-                    println!("ident {:?}", str);
                     arr.push(str.to_owned());
                 }
                 _ => return Err(anyhow!("Unexpected token in parse_zod_enum {}", token.unwrap())),
             }
-
-            println!("{}", arr.len());
         }
         self.parse_right_round()?;
         self.parse_to_end_of_scope()?;
@@ -245,19 +241,15 @@ impl SyntaxTree {
                     continue;
                 }
                 Some(Token::Ident(ref ident)) => {
-                    println!("ident {:?}", ident);
                     self.parse_colon()?;
                     let exp = match self.parse() {
                         Some(e) => e,
                         None => break
                     };
-                    println!("exp {:?}", exp);
                     obj.push((ident.to_owned(), exp));
                 }
                 _ => return Err(anyhow!("Unexpected token in parse_zod_object_body {}", token.unwrap())),
             }
-
-            println!("{}", obj.len());
         }
         self.parse_right_round()?;
 
@@ -314,7 +306,6 @@ impl SyntaxTree {
     }
 
     fn next(&mut self) -> Option<Token> {
-        println!("{}", self.tokens.peek().unwrap());
         self.tokens.next()
     }
 }
