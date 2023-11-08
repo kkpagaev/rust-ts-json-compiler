@@ -24,7 +24,9 @@ products: z.array(
             price: z.number()
           })
         ),
-    lit: z.literal(\"CREATED\")
+    lit: z.literal(\"CREATED\"),
+  attributeValues: z
+    .union([z.array(z.coerce.number().int()), z.coerce.number().int()])
 })
 })";
     let mut lx = Lexer::new(schema);

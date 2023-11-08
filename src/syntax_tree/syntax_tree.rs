@@ -67,6 +67,7 @@ impl SyntaxTree {
             "string" => self.parse_zod_string(),
             "boolean" => self.parse_zod_boolean(),
             "any" => self.parse_zod_any(),
+            "union" => self.parse_zod_union(),
             "coerce" => {
                 self.parse_zod()
             },
@@ -84,6 +85,31 @@ impl SyntaxTree {
             }
             _ => Err(anyhow!("Unexpected token in parse_zod_literal")),
         }
+    }
+
+    fn parse_zod_union(&mut self) -> Result<ZodExpression> {
+        self.next();
+        self.parse_left_round()?;
+        self.parse_left_square()?;
+
+        let mut arr = vec![];
+
+        loop {
+            match self.parse() {
+                Some(e) => arr.push(e),
+                None => break
+            };
+
+            match self.next() {
+                Some(Token::RSquare) => break,
+                Some(Token::Comma) => continue,
+                _ => return Err(anyhow!("Unexpected token in parse_zod_enum"))
+            };
+        }
+        self.parse_right_round()?;
+        self.parse_to_end_of_scope()?;
+
+        Ok(ZodExpression::Union(arr))
     }
 
     fn parse_zod_enum(&mut self) -> Result<ZodExpression> {
