@@ -6,6 +6,7 @@ pub fn main() -> anyhow::Result<()> {
   id: z.coerce.number().int(),
   isActive: z.coerce.boolean(),
   email: z.coerce.string().email(),
+    anyhow: z.any(),
   uuid: z.coerce.string().uuid(),
   ids: z.array(z.coerce.number().int()),
     nested: z.object({

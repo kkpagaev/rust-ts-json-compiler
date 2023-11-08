@@ -15,6 +15,7 @@ pub enum ZodExpression {
     String,
     Boolean,
     Email,
+    Any,
     Enum(Vec<String>),
     Union(Vec<ZodExpression>),
 }
@@ -64,11 +65,20 @@ impl SyntaxTree {
             "number" => self.parse_zod_number(),
             "string" => self.parse_zod_string(),
             "boolean" => self.parse_zod_boolean(),
+            "any" => self.parse_zod_any(),
             "coerce" => {
                 self.parse_zod()
             },
             _ => Err(anyhow!("Unexpected token")),
         }
+    }
+
+    fn parse_zod_any(&mut self) -> Result<ZodExpression> {
+        self.next();
+        self.parse_left_round()?;
+        self.parse_right_round()?;
+
+        Ok(ZodExpression::Any)
     }
 
     fn parse_zod_boolean(&mut self) -> Result<ZodExpression> {
