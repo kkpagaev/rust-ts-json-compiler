@@ -34,18 +34,14 @@ impl SyntaxTree {
             Some(Token::Ident(ident)) => {
                 if ident == "z" {
                     match self.parse_zod() {
-                        Result::Ok(zod) => {
-                            Some(zod)
-                        },
-                        Err(_) => {
-                            None
-                        }
+                        Result::Ok(zod) => Some(zod),
+                        Err(_) => None,
                     }
                 } else {
                     None
                 }
             }
-            _ => None
+            _ => None,
         }
     }
 
@@ -67,9 +63,7 @@ impl SyntaxTree {
             "boolean" => self.parse_zod_boolean(),
             "any" => self.parse_zod_any(),
             "union" => self.parse_zod_union(),
-            "coerce" => {
-                self.parse_zod()
-            },
+            "coerce" => self.parse_zod(),
             _ => Err(anyhow!("Unexpected token")),
         }
     }
@@ -96,13 +90,13 @@ impl SyntaxTree {
         loop {
             match self.parse() {
                 Some(e) => arr.push(e),
-                None => break
+                None => break,
             };
 
             match self.next() {
                 Some(Token::RSquare) => break,
                 Some(Token::Comma) => continue,
-                _ => return Err(anyhow!("Unexpected token in parse_zod_enum"))
+                _ => return Err(anyhow!("Unexpected token in parse_zod_enum")),
             };
         }
         self.parse_right_round()?;
@@ -120,7 +114,7 @@ impl SyntaxTree {
 
         loop {
             let token = self.next();
-            match token  {
+            match token {
                 Some(Token::RSquare) => {
                     break;
                 }
@@ -130,7 +124,12 @@ impl SyntaxTree {
                 Some(Token::Str(ref str)) => {
                     arr.push(str.to_owned());
                 }
-                _ => return Err(anyhow!("Unexpected token in parse_zod_enum {}", token.unwrap())),
+                _ => {
+                    return Err(anyhow!(
+                        "Unexpected token in parse_zod_enum {}",
+                        token.unwrap()
+                    ))
+                }
             }
         }
         self.parse_right_round()?;
@@ -230,7 +229,7 @@ impl SyntaxTree {
 
         loop {
             let token = self.next();
-            match token  {
+            match token {
                 Some(Token::RCurly) => {
                     break;
                 }
@@ -244,11 +243,16 @@ impl SyntaxTree {
                     self.parse_colon()?;
                     let exp = match self.parse() {
                         Some(e) => e,
-                        None => break
+                        None => break,
                     };
                     obj.push((ident.to_owned(), exp));
                 }
-                _ => return Err(anyhow!("Unexpected token in parse_zod_object_body {}", token.unwrap())),
+                _ => {
+                    return Err(anyhow!(
+                        "Unexpected token in parse_zod_object_body {}",
+                        token.unwrap()
+                    ))
+                }
             }
         }
         self.parse_right_round()?;
