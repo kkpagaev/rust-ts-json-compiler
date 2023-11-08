@@ -82,6 +82,26 @@ impl SyntaxTree {
         self.next();
         self.parse_left_round()?;
         self.parse_right_round()?;
+
+        loop {
+            if self.tokens.peek() != Some(&Token::Dot) {
+                break;
+            }
+
+            self.next();
+            let iden = match self.tokens.peek() {
+                Some(Token::Ident(ident)) => ident,
+                _ => return Err(anyhow!("Unexpected token in parse_zod_string")),
+            };
+            if iden == "email" {
+                self.parse_to_end_of_scope()?;
+                return Ok(ZodExpression::Email);
+            }
+            if iden == "uuid" {
+                self.parse_to_end_of_scope()?;
+                return Ok(ZodExpression::UUID);
+            }
+        }
         self.parse_to_end_of_scope()?;
         Ok(ZodExpression::String)
     }

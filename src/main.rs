@@ -4,7 +4,8 @@ pub fn main() -> anyhow::Result<()> {
     // let schema = "z.coerce.number()";
     let schema = "z.object({
   id: z.coerce.number().int(),
-  name: z.coerce.string()
+  email: z.coerce.string().email(),
+  uuid: z.coerce.string().uuid(),
 })";
     let mut lx = Lexer::new(schema);
     let mut tokens = Vec::new();
