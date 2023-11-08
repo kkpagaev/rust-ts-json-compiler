@@ -105,7 +105,7 @@ impl<'a> Lexer<'a> {
 
         self.next_char();
 
-        Token::Ident(value)
+        Token::Str(value)
     }
 
     fn consume_ident(&mut self) -> Token {

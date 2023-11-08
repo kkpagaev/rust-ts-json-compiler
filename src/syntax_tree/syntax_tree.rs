@@ -61,7 +61,7 @@ impl SyntaxTree {
         match ident.as_str() {
             "object" => self.parse_zod_object_body(),
             "array" => self.parse_zod_array(),
-            "literal" => Ok(ZodExpression::Literal("".to_string())),
+            "literal" => self.parse_zod_literal(),
             "number" => self.parse_zod_number(),
             "string" => self.parse_zod_string(),
             "boolean" => self.parse_zod_boolean(),
@@ -73,6 +73,17 @@ impl SyntaxTree {
         }
     }
 
+    fn parse_zod_literal(&mut self) -> Result<ZodExpression> {
+        self.next();
+        self.parse_left_round()?;
+        match self.next() {
+            Some(Token::Str(value)) => {
+                self.parse_right_round()?;
+                Ok(ZodExpression::Literal(value))
+            }
+            _ => Err(anyhow!("Unexpected token in parse_zod_literal")),
+        }
+    }
     fn parse_zod_any(&mut self) -> Result<ZodExpression> {
         self.next();
         self.parse_left_round()?;
