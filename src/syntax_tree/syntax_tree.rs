@@ -62,6 +62,7 @@ impl SyntaxTree {
             "array" => Ok(ZodExpression::Array(Box::new(vec![]))),
             "literal" => Ok(ZodExpression::Literal("".to_string())),
             "number" => self.parse_zod_number(),
+            "string" => self.parse_zod_string(),
             "coerce" => {
                 self.parse_zod()
             },
@@ -75,6 +76,14 @@ impl SyntaxTree {
         self.parse_right_round()?;
         self.parse_to_end_of_scope()?;
         Ok(ZodExpression::Number)
+    }
+
+    fn parse_zod_string(&mut self) -> Result<ZodExpression> {
+        self.next();
+        self.parse_left_round()?;
+        self.parse_right_round()?;
+        self.parse_to_end_of_scope()?;
+        Ok(ZodExpression::String)
     }
 
     fn parse_to_end_of_scope(&mut self) -> Result<()> {
@@ -108,6 +117,9 @@ impl SyntaxTree {
             match self.next() {
                 Some(Token::RCurly) => {
                     break;
+                }
+                Some(Token::Comma) => {
+                    continue;
                 }
                 Some(Token::Ident(ref ident)) => {
                     println!("ident {:?}", ident);

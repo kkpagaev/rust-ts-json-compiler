@@ -3,7 +3,8 @@ use rust_ts_json_compiler::{lexer::{Lexer, Token}, syntax_tree::SyntaxTree};
 pub fn main() -> anyhow::Result<()> {
     // let schema = "z.coerce.number()";
     let schema = "z.object({
-  id: z.coerce.number().int()
+  id: z.coerce.number().int(),
+  name: z.coerce.string()
 })";
     let mut lx = Lexer::new(schema);
     let mut tokens = Vec::new();
