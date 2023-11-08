@@ -1,4 +1,8 @@
-use rust_ts_json_compiler::{lexer::{Lexer, Token}, syntax_tree::SyntaxTree};
+use rust_ts_json_compiler::{
+    lexer::{Lexer, Token},
+    syntax_tree::SyntaxTree,
+    to_json,
+};
 
 pub fn main() -> anyhow::Result<()> {
     // let schema = "z.coerce.number()";
@@ -45,8 +49,7 @@ products: z.array(
 
     let mut tree = SyntaxTree::new(tokens.into_iter().peekable());
 
-    println!("foo {:?}", tree.parse().unwrap());
-
+    println!("{}", to_json(&tree.parse().unwrap()));
 
     return Ok(());
 }
