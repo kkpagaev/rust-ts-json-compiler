@@ -1,4 +1,7 @@
-use crate::{syntax_tree::{ZodExpression, SyntaxTree}, lexer::{Token, Lexer}};
+use crate::{
+    lexer::{Lexer, Token},
+    syntax_tree::{SyntaxTree, ZodExpression},
+};
 
 pub fn get_syntax_tree(schema: &str) -> Option<ZodExpression> {
     let mut lx = Lexer::new(schema);
@@ -33,7 +36,7 @@ pub fn to_json(zod: &ZodExpression) -> String {
         }
         ZodExpression::Number => return "1".to_string(),
         ZodExpression::String => return "\"string\"".to_string(),
-        ZodExpression::UUID   => return "\"aa5ac446-7e1d-11ee-b962-0242ac120002\"".to_string(),
+        ZodExpression::UUID => return "\"aa5ac446-7e1d-11ee-b962-0242ac120002\"".to_string(),
         ZodExpression::Boolean => return "true".to_string(),
         ZodExpression::Array(array) => {
             let mut json = String::new();
@@ -41,7 +44,7 @@ pub fn to_json(zod: &ZodExpression) -> String {
             json.push_str(&to_json(array));
             json.push(']');
             json
-        },
+        }
         ZodExpression::Literal(l) => return format!("\"{}\"", l),
         ZodExpression::Email => return "\"admin@admin.com\"".to_string(),
         ZodExpression::Any => return "{}".to_string(),

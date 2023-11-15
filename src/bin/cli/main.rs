@@ -1,4 +1,4 @@
-use rust_ts_json_compiler::{to_json, get_syntax_tree};
+use rust_ts_json_compiler::{get_syntax_tree, to_json};
 use std::env;
 
 pub fn main() -> anyhow::Result<()> {

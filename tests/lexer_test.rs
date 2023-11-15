@@ -24,7 +24,8 @@ mod tests {
   userId: z.string().uuid().optional()
 })";
         let mut lex = Lexer::new(schema);
-        let data = vec![Token::Ident("z".to_string()),
+        let data = vec![
+            Token::Ident("z".to_string()),
             Token::Dot,
             Token::Ident("object".to_string()),
             Token::LRound,
@@ -100,7 +101,6 @@ mod tests {
             Token::Colon,
             Token::Ident("z".to_string()),
             Token::Dot,
-
             Token::Ident("string".to_string()),
             Token::LRound,
             Token::RRound,
@@ -130,7 +130,6 @@ mod tests {
             Token::Ident("optional".to_string()),
             Token::LRound,
             Token::RRound,
-
             Token::Comma,
             Token::Ident("cityId".to_string()),
             Token::Colon,
@@ -161,7 +160,7 @@ mod tests {
             Token::RRound,
             Token::RCurly,
             Token::RRound,
-            Token::Eof
+            Token::Eof,
         ];
 
         for (i, t) in data.into_iter().enumerate() {
