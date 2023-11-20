@@ -37,7 +37,7 @@ products: z.array(
     let mut tokens = Vec::new();
 
     loop {
-        let token = lx.next();
+        let token = lx.next_token();
         if token == Token::Eof {
             break;
         }
@@ -51,5 +51,5 @@ products: z.array(
 
     println!("{}", to_json(&tree.parse().unwrap()));
 
-    return Ok(());
+    Ok(())
 }

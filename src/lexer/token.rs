@@ -67,9 +67,7 @@ impl From<String> for Token {
             _ => {
                 if value.chars().all(|b| b.is_ascii_digit() || b == '.') {
                     Self::Int(value)
-                } else if value.starts_with('"') && value.ends_with('"') {
-                    Self::Str(value)
-                } else if value.starts_with('\'') && value.ends_with('\'') {
+                } else if (value.starts_with('"') && value.ends_with('"')) || (value.starts_with('\'') && value.ends_with('\'')){
                     Self::Str(value)
                 } else {
                     Self::Ident(value)

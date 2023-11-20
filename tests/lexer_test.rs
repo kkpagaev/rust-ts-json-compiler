@@ -164,7 +164,7 @@ mod tests {
         ];
 
         for (i, t) in data.into_iter().enumerate() {
-            let token = lex.next();
+            let token = lex.next_token();
             assert_eq!(token, t, "test {i} expected={t:?}, got={token:?}");
         }
     }

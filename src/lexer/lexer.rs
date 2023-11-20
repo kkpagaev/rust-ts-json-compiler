@@ -36,10 +36,10 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn next(&mut self) -> Token {
+    pub fn next_token(&mut self) -> Token {
         self.skip_whitespace();
 
-        let ch = match self.ch {
+        match self.ch {
             b'a'..=b'z' | b'A'..=b'Z' | b'_' => self.consume_ident(),
             b'.' => {
                 self.next_char();
@@ -84,9 +84,7 @@ impl<'a> Lexer<'a> {
                 self.next_char();
                 Token::Illegal
             }
-        };
-
-        ch
+        }
     }
 
     fn consume_string(&mut self) -> Token {
@@ -119,15 +117,8 @@ impl<'a> Lexer<'a> {
     }
 
     fn skip_whitespace(&mut self) {
-        loop {
-            match self.ch {
-                b' ' | b'\t' | b'\n' | b'\r' => {
-                    self.next_char();
-                }
-                _ => {
-                    break;
-                }
-            }
+        while let b' ' | b'\t' | b'\n' | b'\r' = self.ch {
+            self.next_char();
         }
     }
 

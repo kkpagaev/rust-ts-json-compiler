@@ -8,7 +8,7 @@ pub fn get_syntax_tree(schema: &str) -> Option<ZodExpression> {
     let mut tokens = Vec::new();
 
     loop {
-        let token = lx.next();
+        let token = lx.next_token();
         if token == Token::Eof {
             break;
         }
@@ -26,18 +26,18 @@ pub fn to_json(zod: &ZodExpression) -> String {
             json.push('{');
             json.push_str(
                 &obj.iter()
-                    .map(|(key, value)| return format!("\"{}\": {}", key, to_json(value)))
+                    .map(|(key, value)| format!("\"{}\": {}", key, to_json(value)))
                     .collect::<Vec<String>>()
                     .join(", "),
             );
 
             json.push('}');
-            return json;
+            json
         }
-        ZodExpression::Number => return "1".to_string(),
-        ZodExpression::String => return "\"string\"".to_string(),
-        ZodExpression::UUID => return "\"aa5ac446-7e1d-11ee-b962-0242ac120002\"".to_string(),
-        ZodExpression::Boolean => return "true".to_string(),
+        ZodExpression::Number =>  "1".to_string(),
+        ZodExpression::String =>  "\"string\"".to_string(),
+        ZodExpression::UUID =>  "\"aa5ac446-7e1d-11ee-b962-0242ac120002\"".to_string(),
+        ZodExpression::Boolean =>  "true".to_string(),
         ZodExpression::Array(array) => {
             let mut json = String::new();
             json.push('[');
@@ -45,10 +45,10 @@ pub fn to_json(zod: &ZodExpression) -> String {
             json.push(']');
             json
         }
-        ZodExpression::Literal(l) => return format!("\"{}\"", l),
-        ZodExpression::Email => return "\"admin@admin.com\"".to_string(),
-        ZodExpression::Any => return "{}".to_string(),
-        ZodExpression::Enum(e) => return format!("\"{}\"", e.first().unwrap()),
-        ZodExpression::Union(u) => return to_json(u.first().unwrap()),
+        ZodExpression::Literal(l) =>  format!("\"{}\"", l),
+        ZodExpression::Email =>  "\"admin@admin.com\"".to_string(),
+        ZodExpression::Any =>  "{}".to_string(),
+        ZodExpression::Enum(e) =>  format!("\"{}\"", e.first().unwrap()),
+        ZodExpression::Union(u) =>  to_json(u.first().unwrap()),
     }
 }

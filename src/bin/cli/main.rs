@@ -16,5 +16,5 @@ pub fn main() -> anyhow::Result<()> {
 
     println!("{}", json);
 
-    return Ok(());
+    Ok(())
 }

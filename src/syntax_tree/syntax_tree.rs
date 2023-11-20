@@ -237,19 +237,14 @@ impl SyntaxTree {
     }
 
     fn parse_to_end_of_scope(&mut self) {
-        loop {
-            match self.tokens.peek() {
-                Some(token) => match token {
-                    Token::Eof | Token::RSquare | Token::Comma | Token::RCurly => {
-                        break;
-                    }
-                    _ => {
-                        self.next();
-                        continue;
-                    }
-                },
-                None => {
+        while let Some(token) = self.tokens.peek() {
+            match token {
+                Token::Eof | Token::RSquare | Token::Comma | Token::RCurly => {
                     break;
+                }
+                _ => {
+                    self.next();
+                    continue;
                 }
             }
         }
