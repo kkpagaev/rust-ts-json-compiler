@@ -5,7 +5,7 @@ build:
 	cargo build --release
 
 fmt:
-	carge fmt 
+	cargo fmt 
 
 lint:
 	cargo clippy

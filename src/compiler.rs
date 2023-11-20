@@ -34,10 +34,10 @@ pub fn to_json(zod: &ZodExpression) -> String {
             json.push('}');
             json
         }
-        ZodExpression::Number =>  "1".to_string(),
-        ZodExpression::String =>  "\"string\"".to_string(),
-        ZodExpression::UUID =>  "\"aa5ac446-7e1d-11ee-b962-0242ac120002\"".to_string(),
-        ZodExpression::Boolean =>  "true".to_string(),
+        ZodExpression::Number => "1".to_string(),
+        ZodExpression::String => "\"string\"".to_string(),
+        ZodExpression::UUID => "\"aa5ac446-7e1d-11ee-b962-0242ac120002\"".to_string(),
+        ZodExpression::Boolean => "true".to_string(),
         ZodExpression::Array(array) => {
             let mut json = String::new();
             json.push('[');
@@ -45,10 +45,10 @@ pub fn to_json(zod: &ZodExpression) -> String {
             json.push(']');
             json
         }
-        ZodExpression::Literal(l) =>  format!("\"{}\"", l),
-        ZodExpression::Email =>  "\"admin@admin.com\"".to_string(),
-        ZodExpression::Any =>  "{}".to_string(),
-        ZodExpression::Enum(e) =>  format!("\"{}\"", e.first().unwrap()),
-        ZodExpression::Union(u) =>  to_json(u.first().unwrap()),
+        ZodExpression::Literal(l) => format!("\"{}\"", l),
+        ZodExpression::Email => "\"admin@admin.com\"".to_string(),
+        ZodExpression::Any => "{}".to_string(),
+        ZodExpression::Enum(e) => format!("\"{}\"", e.first().unwrap()),
+        ZodExpression::Union(u) => to_json(u.first().unwrap()),
     }
 }
