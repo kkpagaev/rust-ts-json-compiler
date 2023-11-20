@@ -68,7 +68,12 @@ impl SyntaxTree {
         self.parse_dot()?;
         let ident = match self.tokens.peek() {
             Some(Token::Ident(ident)) => ident,
-            Some(_) => return Err(SyntaxError::UnexpectedToken(self.tokens.next().unwrap(), Token::Ident("".to_string()))),
+            Some(_) => {
+                return Err(SyntaxError::UnexpectedToken(
+                    self.tokens.next().unwrap(),
+                    Token::Ident("".to_string()),
+                ))
+            }
             None => return Err(SyntaxError::UnexpectedEndOfFile),
         };
 
@@ -95,7 +100,10 @@ impl SyntaxTree {
                 self.parse_right_round()?;
                 Ok(ZodExpression::Literal(value))
             }
-            Some(token) => Err(SyntaxError::UnexpectedToken(token, Token::Str("\"\"".to_string()))),
+            Some(token) => Err(SyntaxError::UnexpectedToken(
+                token,
+                Token::Str("\"\"".to_string()),
+            )),
             None => Err(SyntaxError::UnexpectedEndOfFile),
         }
     }
@@ -207,7 +215,12 @@ impl SyntaxTree {
             self.next();
             let iden = match self.tokens.peek() {
                 Some(Token::Ident(ident)) => ident,
-                Some(_) => return Err(SyntaxError::UnexpectedToken(self.next().unwrap(), Token::Ident("".to_string()))),
+                Some(_) => {
+                    return Err(SyntaxError::UnexpectedToken(
+                        self.next().unwrap(),
+                        Token::Ident("".to_string()),
+                    ))
+                }
                 None => return Err(SyntaxError::UnexpectedEndOfFile),
             };
             if iden == "email" {
