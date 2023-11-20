@@ -9,3 +9,6 @@ fmt:
 
 lint:
 	cargo clippy
+
+publish:
+	cargo publish
