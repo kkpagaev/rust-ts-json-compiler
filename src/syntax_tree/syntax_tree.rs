@@ -1,8 +1,8 @@
 use std::iter::Peekable;
 use std::vec;
+use thiserror::Error;
 
 use crate::lexer::Token;
-use anyhow::{anyhow, Ok, Result};
 
 #[derive(Debug)]
 #[allow(dead_code)]
@@ -18,6 +18,24 @@ pub enum ZodExpression {
     Any,
     Enum(Vec<String>),
     Union(Vec<ZodExpression>),
+}
+
+#[derive(Error, Debug)]
+pub enum SyntaxError {
+    #[error("Expected token {0:?} found {1:?}")]
+    UnexpectedToken(Token, Token),
+
+    #[error("Invalid identifier {0:?}")]
+    InvalidIdentifier(String),
+
+    #[error("Unexpected end of a file")]
+    UnexpectedEndOfFile,
+
+    #[error("Unexpected token in enum {0:?}")]
+    UnexpectedTokenInEnum(Token),
+
+    #[error("Unexpected token in object body {0:?}")]
+    UnexpectedTokenInObjectBody(Token),
 }
 
 pub struct SyntaxTree {
@@ -45,12 +63,13 @@ impl SyntaxTree {
         }
     }
 
-    fn parse_zod(&mut self) -> Result<ZodExpression> {
+    fn parse_zod(&mut self) -> Result<ZodExpression, SyntaxError> {
         self.next();
         self.parse_dot()?;
         let ident = match self.tokens.peek() {
             Some(Token::Ident(ident)) => ident,
-            _ => return Err(anyhow!("Unexpected token in parse_zod")),
+            Some(_) => return Err(SyntaxError::UnexpectedToken(self.tokens.next().unwrap(), Token::Ident("".to_string()))),
+            None => return Err(SyntaxError::UnexpectedEndOfFile),
         };
 
         match ident.as_str() {
@@ -64,11 +83,11 @@ impl SyntaxTree {
             "any" => self.parse_zod_any(),
             "union" => self.parse_zod_union(),
             "coerce" => self.parse_zod(),
-            _ => Err(anyhow!("Unexpected token")),
+            _ => Err(SyntaxError::InvalidIdentifier(ident.to_string())),
         }
     }
 
-    fn parse_zod_literal(&mut self) -> Result<ZodExpression> {
+    fn parse_zod_literal(&mut self) -> Result<ZodExpression, SyntaxError> {
         self.next();
         self.parse_left_round()?;
         match self.next() {
@@ -76,11 +95,12 @@ impl SyntaxTree {
                 self.parse_right_round()?;
                 Ok(ZodExpression::Literal(value))
             }
-            _ => Err(anyhow!("Unexpected token in parse_zod_literal")),
+            Some(token) => Err(SyntaxError::UnexpectedToken(token, Token::Str("\"\"".to_string()))),
+            None => Err(SyntaxError::UnexpectedEndOfFile),
         }
     }
 
-    fn parse_zod_union(&mut self) -> Result<ZodExpression> {
+    fn parse_zod_union(&mut self) -> Result<ZodExpression, SyntaxError> {
         self.next();
         self.parse_left_round()?;
         self.parse_left_square()?;
@@ -96,16 +116,17 @@ impl SyntaxTree {
             match self.next() {
                 Some(Token::RSquare) => break,
                 Some(Token::Comma) => continue,
-                _ => return Err(anyhow!("Unexpected token in parse_zod_enum")),
+                Some(token) => return Err(SyntaxError::UnexpectedToken(token, Token::RSquare)),
+                None => return Err(SyntaxError::UnexpectedEndOfFile),
             };
         }
         self.parse_right_round()?;
-        self.parse_to_end_of_scope()?;
+        self.parse_to_end_of_scope();
 
         Ok(ZodExpression::Union(arr))
     }
 
-    fn parse_zod_enum(&mut self) -> Result<ZodExpression> {
+    fn parse_zod_enum(&mut self) -> Result<ZodExpression, SyntaxError> {
         self.next();
         self.parse_left_round()?;
         self.parse_left_square()?;
@@ -124,21 +145,21 @@ impl SyntaxTree {
                 Some(Token::Str(ref str)) => {
                     arr.push(str.to_owned());
                 }
-                _ => {
-                    return Err(anyhow!(
-                        "Unexpected token in parse_zod_enum {}",
-                        token.unwrap()
-                    ))
+                None => {
+                    return Err(SyntaxError::UnexpectedEndOfFile);
+                }
+                Some(token) => {
+                    return Err(SyntaxError::UnexpectedTokenInEnum(token));
                 }
             }
         }
         self.parse_right_round()?;
-        self.parse_to_end_of_scope()?;
+        self.parse_to_end_of_scope();
 
         Ok(ZodExpression::Enum(arr))
     }
 
-    fn parse_zod_any(&mut self) -> Result<ZodExpression> {
+    fn parse_zod_any(&mut self) -> Result<ZodExpression, SyntaxError> {
         self.next();
         self.parse_left_round()?;
         self.parse_right_round()?;
@@ -146,7 +167,7 @@ impl SyntaxTree {
         Ok(ZodExpression::Any)
     }
 
-    fn parse_zod_boolean(&mut self) -> Result<ZodExpression> {
+    fn parse_zod_boolean(&mut self) -> Result<ZodExpression, SyntaxError> {
         self.next();
         self.parse_left_round()?;
         self.parse_right_round()?;
@@ -154,26 +175,26 @@ impl SyntaxTree {
         Ok(ZodExpression::Boolean)
     }
 
-    fn parse_zod_array(&mut self) -> Result<ZodExpression> {
+    fn parse_zod_array(&mut self) -> Result<ZodExpression, SyntaxError> {
         self.next();
         self.parse_left_round()?;
         let exp = match self.parse() {
             Some(e) => e,
-            None => return Err(anyhow!("Unexpected token in parse_zod_array")),
+            None => return Err(SyntaxError::UnexpectedEndOfFile),
         };
-        self.parse_to_end_of_scope()?;
+        self.parse_to_end_of_scope();
 
         Ok(ZodExpression::Array(Box::new(exp)))
     }
-    fn parse_zod_number(&mut self) -> Result<ZodExpression> {
+    fn parse_zod_number(&mut self) -> Result<ZodExpression, SyntaxError> {
         self.next();
         self.parse_left_round()?;
         self.parse_right_round()?;
-        self.parse_to_end_of_scope()?;
+        self.parse_to_end_of_scope();
         Ok(ZodExpression::Number)
     }
 
-    fn parse_zod_string(&mut self) -> Result<ZodExpression> {
+    fn parse_zod_string(&mut self) -> Result<ZodExpression, SyntaxError> {
         self.next();
         self.parse_left_round()?;
         self.parse_right_round()?;
@@ -186,22 +207,23 @@ impl SyntaxTree {
             self.next();
             let iden = match self.tokens.peek() {
                 Some(Token::Ident(ident)) => ident,
-                _ => return Err(anyhow!("Unexpected token in parse_zod_string")),
+                Some(_) => return Err(SyntaxError::UnexpectedToken(self.next().unwrap(), Token::Ident("".to_string()))),
+                None => return Err(SyntaxError::UnexpectedEndOfFile),
             };
             if iden == "email" {
-                self.parse_to_end_of_scope()?;
+                self.parse_to_end_of_scope();
                 return Ok(ZodExpression::Email);
             }
             if iden == "uuid" {
-                self.parse_to_end_of_scope()?;
+                self.parse_to_end_of_scope();
                 return Ok(ZodExpression::UUID);
             }
         }
-        self.parse_to_end_of_scope()?;
+        self.parse_to_end_of_scope();
         Ok(ZodExpression::String)
     }
 
-    fn parse_to_end_of_scope(&mut self) -> Result<()> {
+    fn parse_to_end_of_scope(&mut self) {
         loop {
             match self.tokens.peek() {
                 Some(token) => match token {
@@ -218,11 +240,9 @@ impl SyntaxTree {
                 }
             }
         }
-
-        Ok(())
     }
 
-    fn parse_zod_object_body(&mut self) -> Result<ZodExpression> {
+    fn parse_zod_object_body(&mut self) -> Result<ZodExpression, SyntaxError> {
         self.next();
         self.parse_left_round()?;
         self.parse_left_curly()?;
@@ -248,11 +268,11 @@ impl SyntaxTree {
                     };
                     obj.push((ident.to_owned(), exp));
                 }
-                _ => {
-                    return Err(anyhow!(
-                        "Unexpected token in parse_zod_object_body {}",
-                        token.unwrap()
-                    ))
+                Some(token) => {
+                    return Err(SyntaxError::UnexpectedTokenInObjectBody(token));
+                }
+                None => {
+                    return Err(SyntaxError::UnexpectedEndOfFile);
                 }
             }
         }
@@ -261,52 +281,51 @@ impl SyntaxTree {
         Ok(ZodExpression::Object(Box::new(obj)))
     }
 
-    fn parse_left_round(&mut self) -> Result<()> {
+    fn parse_left_round(&mut self) -> Result<(), SyntaxError> {
         match self.next() {
             Some(Token::LRound) => Ok(()),
-            _ => Err(anyhow!("Unexpected token parse_left_round")),
+            Some(token) => Err(SyntaxError::UnexpectedToken(token, Token::LRound)),
+            None => Err(SyntaxError::UnexpectedEndOfFile),
         }
     }
 
-    fn parse_right_round(&mut self) -> Result<()> {
+    fn parse_right_round(&mut self) -> Result<(), SyntaxError> {
         match self.next() {
             Some(Token::RRound) => Ok(()),
-            _ => Err(anyhow!("Unexpected token parse_right_round")),
+            Some(token) => Err(SyntaxError::UnexpectedToken(token, Token::RRound)),
+            None => Err(SyntaxError::UnexpectedEndOfFile),
         }
     }
 
-    fn parse_left_curly(&mut self) -> Result<()> {
+    fn parse_left_curly(&mut self) -> Result<(), SyntaxError> {
         match self.next() {
             Some(Token::LCurly) => Ok(()),
-            _ => Err(anyhow!("Unexpected token parse_left_curly")),
+            Some(token) => Err(SyntaxError::UnexpectedToken(token, Token::LCurly)),
+            None => Err(SyntaxError::UnexpectedEndOfFile),
         }
     }
 
-    // fn parse_right_curly(&mut self) -> Result<()> {
-    //     match self.next() {
-    //         Some(Token::RCurly) => Ok(()),
-    //         _ => Err(anyhow!("Unexpected token parse_right_curly")),
-    //     }
-    // }
-
-    fn parse_colon(&mut self) -> Result<()> {
+    fn parse_colon(&mut self) -> Result<(), SyntaxError> {
         match self.next() {
             Some(Token::Colon) => Ok(()),
-            _ => Err(anyhow!("Unexpected token parse_colon")),
+            Some(token) => Err(SyntaxError::UnexpectedToken(token, Token::Colon)),
+            None => Err(SyntaxError::UnexpectedEndOfFile),
         }
     }
 
-    fn parse_left_square(&mut self) -> Result<()> {
+    fn parse_left_square(&mut self) -> Result<(), SyntaxError> {
         match self.next() {
             Some(Token::LSquare) => Ok(()),
-            _ => Err(anyhow!("Unexpected token parse_left_square")),
+            Some(token) => Err(SyntaxError::UnexpectedToken(token, Token::LSquare)),
+            None => Err(SyntaxError::UnexpectedEndOfFile),
         }
     }
 
-    fn parse_dot(&mut self) -> Result<()> {
+    fn parse_dot(&mut self) -> Result<(), SyntaxError> {
         match self.next() {
             Some(Token::Dot) => Ok(()),
-            _ => Err(anyhow!("Unexpected token parse_dot")),
+            Some(token) => Err(SyntaxError::UnexpectedToken(token, Token::Dot)),
+            None => Err(SyntaxError::UnexpectedEndOfFile),
         }
     }
 

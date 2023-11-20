@@ -10,3 +10,4 @@ description = "ts-zod compiller to json"
 [dependencies]
 anyhow = "1.0.75"
 peg = "0.8.2"
+thiserror = "1.0.50"
