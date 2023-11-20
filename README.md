@@ -21,7 +21,7 @@ pub fn main() {
     })
     ";
 
-    let json_schema = ZodParser::parse_to_json(zod_schema);
+    let json_schema = rust_ts_json_compiler::to_json(zod_schema);
 
     /* 
     {
